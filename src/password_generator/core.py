@@ -7,6 +7,14 @@ AMBIGUOUS = set("O0oIl1|S5B8")
 
 @dataclass
 class Options:
+    """Options for password generation.
+
+    Attributes:
+        length: desired password length.
+        use_lower/use_upper/use_digits/use_symbols: enable character classes.
+        exclude_ambiguous: remove visually ambiguous characters from pools.
+        no_duplicates: avoid repeating characters in the password.
+    """
     length: int = 16
     use_lower: bool = True
     use_upper: bool = True
@@ -16,6 +24,13 @@ class Options:
     no_duplicates: bool = False
 
 def build_pool(opts: Options) -> dict[str, str]:
+    """Build character classes based on the provided `Options`.
+
+    Returns a mapping from class-name to the string of characters to use.
+
+    Raises:
+        ValueError: if no character classes are enabled.
+    """
     classes: dict[str, str] = {}
     if opts.use_lower:
         classes["lower"] = string.ascii_lowercase
@@ -33,6 +48,12 @@ def build_pool(opts: Options) -> dict[str, str]:
     return classes
 
 def generate_password(opts: Options) -> str:
+    """Generate a secure password according to `opts`.
+
+    Guarantees at least one character from each enabled class is present.
+    Raises `ValueError` when options are invalid (too-short length, not
+    enough unique characters for `no_duplicates`, or no classes enabled).
+    """
     classes = build_pool(opts)
     class_list = list(classes.values())
 
@@ -65,3 +86,6 @@ def generate_password(opts: Options) -> str:
         password_chars[i], password_chars[j] = password_chars[j], password_chars[i]
 
     return "".join(password_chars)
+
+
+__all__ = ["Options", "build_pool", "generate_password", "AMBIGUOUS"]
